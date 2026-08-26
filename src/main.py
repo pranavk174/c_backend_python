@@ -1,23 +1,17 @@
 import os
 
 from fastapi import FastAPI
-from contextlib import asynccontextmanager
+from .app.utils.database import lifespan
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from .app.apis.users import sendOtp as send_otp 
-from prisma import Prisma
-from .app.utils.database import lifespan
+
+
+from .app.routerspaths.baseroute import base_router
+
 load_dotenv()
 
 
-app = FastAPI(
-    title="Chat API",
-    lifespan=lifespan
-)
-
-
-
-
+app = FastAPI(title="Chat API", lifespan=lifespan)
 
 
 app.add_middleware(
@@ -31,20 +25,4 @@ app.add_middleware(
 )
 
 
-@app.get("/")
-async def root():
-
-  users = await db.users.find_many()
-
-  print(users)
-
-  return {"todos":users}
-
-
-
-@app.post('/send-otp')
-async def send_otp_route(email: str):
-    print(email, "email dataaaa")
-    return await send_otp(email)
-
- 
+app.include_router(base_router)
