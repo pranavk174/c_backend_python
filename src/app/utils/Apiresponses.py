@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class ApiResponse(BaseModel):
@@ -38,4 +39,4 @@ class VerifyOtpData(BaseModel):
 
 
 class UserApiResponse(ApiResponse):
-      data: Users | User | VerifyOtpData 
+    data: Users | User | VerifyOtpData | Optional[dict] = None

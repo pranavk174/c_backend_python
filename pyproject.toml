@@ -8,9 +8,11 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "aiosmtplib>=5.1.2",
     "bcrypt>=5.0.0",
     "fastapi>=0.141.1",
     "prisma>=0.15.0",
+    "pyjwt>=2.13.0",
     "uvicorn[standard]>=0.52.4",
 ]
 
