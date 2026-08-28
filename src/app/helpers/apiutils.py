@@ -1,4 +1,6 @@
 from fastapi import Response
+
+from app.utils.pydanticTypes.User.types import verifyOtpInput
 from ..utils.database import db
 from ..utils.Apiresponses import User
 from ..utils.Apierros import AppError
@@ -6,13 +8,18 @@ from ..utils.utils import generate_token
 from datetime import datetime, timedelta, timezone
 
 
-async def responseUpdate(response: Response, email, user: User, **args: dict):
-    access_token, refresh_token = generate_token(user)
+async def responseUpdate(response: Response, user: User, args: verifyOtpInput):
+    access_token, refresh_token = generate_token(user, args.device_id)
     print("=========", args, "argsssss")
 
-    args = args["args"]
-
-    email, otp, device_id, ip_address, location, device_name = args.values()
+    email, otp, device_id, ip_address, location, device_name = (
+        args.email,
+        args.otp,
+        args.device_id,
+        args.ip_address,
+        args.location,
+        args.device_name,
+    )
     await db.query_raw(
         """
                         

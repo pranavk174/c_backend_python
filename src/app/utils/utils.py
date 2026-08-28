@@ -3,6 +3,8 @@ from datetime import datetime, timedelta, timezone
 import secrets
 from .Apierros import AppError
 import traceback
+import jwt
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 
 async def otp_generator():
@@ -80,20 +82,22 @@ async def async_util_handeler(fn):
 
 
 import os
-import jwt
 
 jwt_secret = os.getenv("JWT_SECRET")
+refresh_secret = os.getenv("REFRESH_SECRET")
 jwt_algo = "HS256"
 
 
-def generate_token(user):
+def generate_token(user, device_id):
     refresh_expires_at = datetime.now(timezone.utc) + timedelta(days=7)
     access_expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
 
+    print(user, "user")
     payload = {
         "user_id": user["id"],
         "profile_pic": user["profile_pic"],
         "email": user["email"],
+        "device_id": device_id,
     }
 
     access_payload = {
@@ -110,3 +114,16 @@ def generate_token(user):
     refresh_token = jwt.encode(refresh_payload, jwt_secret, algorithm=jwt_algo)
 
     return access_token, refresh_token
+
+
+def tokenValidator(token: str, type: str):
+    try:
+        secret = jwt_secret if type == "access" else refresh_secret
+        payload = jwt.decode(token, secret, algorithms=[jwt_algo])
+        return payload
+
+    except ExpiredSignatureError as er:
+        raise Exception("Expired token")
+
+    except InvalidTokenError as er:
+        raise Exception("Invalid token")

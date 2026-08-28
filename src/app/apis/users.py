@@ -1,3 +1,5 @@
+from app.utils.pydanticTypes.User.types import User, verifyOtpInput
+
 from ..utils.database import db
 from ..utils.Apierros import AppError
 from ..utils.Apiresponses import UserApiResponse, ApiResponse
@@ -104,7 +106,13 @@ insert into register (email,otp,expires_at,is_verified) values ($1 ,$2,$3::times
         )
 
 
-async def verify_otp(otp: str, email: str, response: Response, **args: dict):
+async def verify_otp(data: verifyOtpInput, response: Response):
+
+    otp = data.otp
+    email = data.email
+
+    print(email, otp)
+
     if len(otp) != 6 or not email or not re.match(EMAIL_REGEX, email):
         print((len(otp) != 6 or not email or re.match(EMAIL_REGEX, email)), "condition")
         raise AppError(
@@ -125,10 +133,12 @@ async def verify_otp(otp: str, email: str, response: Response, **args: dict):
         )
         if len(register) == 0:
             raise AppError(message="User Does not exist", status=404, success=False)
-        is_valid = bcrypt.checkpw(otp.encode("utf-8"), register[0]["otp"])
-        if not is_valid or register[0]["expires_at"] <= datetime.now():
+        is_valid = bcrypt.checkpw(
+            otp.encode("utf-8"), register[0]["otp"].encode("utf-8")
+        )
+        if not is_valid or register[0]["expires_at"] <= datetime.now(timezone.utc):
             raise AppError(
-                message="OTP is Invalid Or Expired", status=401, success=False
+                message="OTP is Invalid Or Expiredddd", status=401, success=False
             )
 
         verified = await db.query_raw(
@@ -170,7 +180,7 @@ async def verify_otp(otp: str, email: str, response: Response, **args: dict):
         if not is_valid or expires_at <= datetime.now(timezone.utc):
 
             raise AppError(
-                message="OTP is Invalid Or Expired", status=401, success=False
+                message="OTP is Invalid Or Expiredss", status=401, success=False
             )
         else:
             print(
@@ -179,8 +189,51 @@ async def verify_otp(otp: str, email: str, response: Response, **args: dict):
                 datetime.now(timezone.utc),
                 expires_at <= datetime.now(timezone.utc),
             )
-            await responseUpdate(response, email, user[0], **args)
+            await responseUpdate(response, user[0], data)
 
             return UserApiResponse(
                 message="Login successfull", status=201, success=True
             )
+
+
+async def user_logout(data: User, response: Response):
+    print(data["user_id"], "dataaaaa", data)
+    done = await db.query_raw(
+        """
+                              update devices set refresh_token = null , 
+                              logged_out_at = $1::timestamptz 
+                              where user_id = $2 and device_id = $3
+                              
+                              """,
+        datetime.now(timezone.utc),
+        data["user_id"],
+        data["device_id"],
+    )
+
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+    response.delete_cookie("theme")
+
+    return UserApiResponse(message="Logged out Successfully", status=200, success=True)
+
+
+# async def refresh_token(data: User, response: Response):
+#     return await refresh_token_api
+
+
+async def get_user_data(data: User):
+
+    print(data, "dataaaaa user")
+    user = await db.query_raw(
+        """
+                              
+                              select * from users where account_status = $2::account_status and id  $1
+                              
+                              """,
+        data["user_id"],
+        "active",
+    )
+
+    return UserApiResponse(
+        message="Successfully retrieved Users Data", status=200, data=user
+    )
