@@ -38,11 +38,11 @@ def asyncHandeler(fn):
         except TypeError as er:
             print(type(er), "error in type error")
             return JSONResponse(
-                status_code=500,
+                status_code=422,
                 content={
                     "success": False,
                     "message": "Some thing Went wrong",
-                    "status": 500,
+                    "status": 422,
                     "error": str(er),
                 },
             )
