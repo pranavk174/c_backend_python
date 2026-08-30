@@ -550,7 +550,7 @@ async def unblock_user_api(input: int, data: User):
     await db.query_raw(
         """
         
-        update block set blocked = false ,unblocked_at= $3::timestamptz where user_id = $1 and blocked_user_id = $2 and unblocked_at = NULL
+        update block set blocked = false ,unblocked_at= $3::timestamptz where user_id = $1 and blocked_user_id = $2 and unblocked_at is NULL 
                        
                     
                        """,

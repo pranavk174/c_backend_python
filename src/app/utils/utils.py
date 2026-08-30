@@ -4,7 +4,11 @@ import secrets
 from .Apierros import AppError
 import traceback
 import jwt
-from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, InvalidTokenError
+from jwt.exceptions import (
+    ExpiredSignatureError,
+    InvalidSignatureError,
+    InvalidTokenError,
+)
 
 
 async def otp_generator():
@@ -31,6 +35,17 @@ def asyncHandeler(fn):
     async def wrapper(*args, **kwargs):
         try:
             return await fn(*args, **kwargs)
+        except TypeError as er:
+            print(type(er), "error in type error")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "message": "Some thing Went wrong",
+                    "status": 500,
+                    "error": str(er),
+                },
+            )
 
         except AppError as er:
             return JSONResponse(
@@ -54,7 +69,7 @@ def asyncHandeler(fn):
                 content={
                     "success": False,
                     "message": "Internal Server Error",
-                    "error": {er},
+                    "error": str(er),
                 },
             )
 
