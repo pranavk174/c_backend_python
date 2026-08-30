@@ -4,9 +4,5 @@ from .chatroute import chat_router
 
 base_router = APIRouter()
 
-base_router.include_router(
-    user_router
-)
-base_router.include_router(
-    chat_router
-)
+base_router.include_router(user_router, prefix="/user")
+base_router.include_router(chat_router, prefix="/chat")

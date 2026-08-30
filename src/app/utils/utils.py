@@ -4,7 +4,7 @@ import secrets
 from .Apierros import AppError
 import traceback
 import jwt
-from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError, InvalidTokenError
 
 
 async def otp_generator():
@@ -94,7 +94,7 @@ def generate_token(user, device_id):
 
     print(user, "user")
     payload = {
-        "user_id": user["id"],
+        "id": user["id"],
         "profile_pic": user["profile_pic"],
         "email": user["email"],
         "device_id": device_id,
@@ -111,7 +111,7 @@ def generate_token(user, device_id):
     }
 
     access_token = jwt.encode(access_payload, jwt_secret, algorithm=jwt_algo)
-    refresh_token = jwt.encode(refresh_payload, jwt_secret, algorithm=jwt_algo)
+    refresh_token = jwt.encode(refresh_payload, refresh_secret, algorithm=jwt_algo)
 
     return access_token, refresh_token
 
@@ -119,6 +119,7 @@ def generate_token(user, device_id):
 def tokenValidator(token: str, type: str):
     try:
         secret = jwt_secret if type == "access" else refresh_secret
+        print(secret, "secret")
         payload = jwt.decode(token, secret, algorithms=[jwt_algo])
         return payload
 
@@ -126,4 +127,8 @@ def tokenValidator(token: str, type: str):
         raise Exception("Expired token")
 
     except InvalidTokenError as er:
+        print(er, "erririn jwt sign")
         raise Exception("Invalid token")
+    except InvalidSignatureError as err:
+        print(err, "erririn jwt sign")
+        raise Exception("Signature verification failed")

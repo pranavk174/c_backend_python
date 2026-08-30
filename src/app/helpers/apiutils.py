@@ -23,14 +23,15 @@ async def responseUpdate(response: Response, user: User, args: verifyOtpInput):
     await db.query_raw(
         """
                         
-                       insert into devices (device_id,ip_address,location,device_name,expires_at,last_login,user_id,refresh_token) values($1,$2,$3,$4,$5::timestamptz,$6::timestamptz,$7,$8)
+                       insert into devices (device_id,ip_address,location,device_name,expires_at,last_login,user_id,refresh_token,logged_out_at) values($1,$2,$3,$4,$5::timestamptz,$6::timestamptz,$7,$8,NULL)
                        on conflict(user_id,device_id)
                        do update set
                                  expires_at = EXCLUDED.expires_at,
         last_login = EXCLUDED.last_login,
         ip_address = EXCLUDED.ip_address,
         location = EXCLUDED.location,
-        refresh_token = EXCLUDED.refresh_token
+        refresh_token = EXCLUDED.refresh_token,
+        logged_out_at = EXCLUDED.logged_out_at
     
                        """,
         device_id,
@@ -73,7 +74,7 @@ async def responseUpdate(response: Response, user: User, args: verifyOtpInput):
 def accountStatus(user):
     if user["account_status"] == "deleted" or user["account_status"] == "suspended":
         raise AppError(
-            message=f"Account is {user.account_status}, contact support",
-            status_code=403,
+            message=f"Account is {user["account_status"]}, contact support",
+            status=403,
             success=False,
         )

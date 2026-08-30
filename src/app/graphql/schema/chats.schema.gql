@@ -1,0 +1,163 @@
+directive @isChatMember on FIELD_DEFINITION
+
+enum delete_type {
+  onlyme
+  ONLYME
+  OnlyMe
+  Everyone
+  everyone
+  EVERYONE
+}
+type Chats {
+  chat_id: Int!
+  user_id: Int
+  profile_pic: String
+  cover_pic: String
+  last_message: String
+  last_message_at: String
+  blocked: Boolean
+  isOnline: Boolean
+  name: String!
+  chat_type: String!
+  unread_count: Int!
+  bio: String
+  email: String
+  mobile: String
+}
+
+type emoji {
+  react_id: Int!
+  emoji: String!
+}
+
+type Emojis {
+  items: [emoji]!
+}
+
+type reaction {
+  react_id: Int!
+  user_id: Int!
+}
+
+type Chat {
+  id: Int!
+  sender_id: Int!
+  created_at: String!
+  seen_at: String
+  is_forwarded: Boolean!
+  preview: String
+  content: String
+  seen_users: [Int]
+  story_id: Int
+  story_item: String
+  is_edited: Boolean!
+  reply_to_message_id: Int
+  is_deleted: Boolean
+  reactions: [reaction]!
+}
+
+type Message {
+  id: Int!
+  chat_id: Int!
+  sender_id: Int!
+  content: String!
+  created_at: String!
+}
+
+# type reactions {
+#   items: [reaction]!
+# }
+
+type SingleChat {
+  items: [Chat]
+  hasMore: Boolean!
+  nextCursor: Int
+}
+type AllChats {
+  items: [Chats]
+}
+
+type Wallpaper {
+  url: String!
+}
+
+type newChat {
+  chat_id: Int!
+}
+
+type member {
+  member_id: Int!
+  role: String!
+}
+
+type members {
+  items: [member!]!
+}
+
+union ChatResponse =
+  | SingleChat
+  | AllChats
+  | Emojis
+  | Wallpaper
+  | newChat
+  | members
+
+type chatApiResponse implements apiResponse {
+  message: String!
+  status: Int!
+  success: Boolean!
+  error: String
+  data: ChatResponse
+}
+
+input Media {
+  url: String!
+  file_name: String!
+  file_type: FileType!
+  file_size: String!
+}
+
+input ChatInput {
+  reciever_ids: [Int!]
+  chat_ids: [Int!]
+  message_ids: [Int!]
+  delete_type: delete_type
+  cursor: Int
+  hasMore: Boolean
+  limit: Int
+  content: String
+  reaction_id: Int
+  media: [Media!]
+}
+
+input newGroupInput {
+  groupName: String!
+  profile_pic: String
+  member_ids: [Int!]!
+  cover_pic: String
+}
+
+extend type Query {
+  getChatById(input: ChatInput!): chatApiResponse! @auth @isChatMember
+  getAllChats: chatApiResponse! @auth
+  getMembers(input: ChatInput!): chatApiResponse @auth @isChatMember
+  getEmojis: chatApiResponse!
+  getWallPaper: chatApiResponse! @auth
+}
+
+extend type Mutation {
+  sendMessage(input: ChatInput!): chatApiResponse! @auth
+  createNewChat(member_id: Int!): chatApiResponse! @auth
+  createNewGroup(input: newGroupInput!): chatApiResponse! @auth
+  editMessage(input: ChatInput!): chatApiResponse! @auth @isChatMember
+  deleteMessage(input: ChatInput!): chatApiResponse! @auth @isChatMember
+  replyMessage(input: ChatInput!): chatApiResponse! @auth @isChatMember
+  reactMessage(input: ChatInput!): chatApiResponse! @auth @isChatMember
+  forwardMessage(input: ChatInput!): chatApiResponse! @auth @isChatMember
+  seenMessage(input: ChatInput!): chatApiResponse! @auth @isChatMember
+  setWallpaper(url: String!): chatApiResponse! @auth
+}
+
+extend type Subscription {
+  newMessage(chat_id: Int!): Message!
+}

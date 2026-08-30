@@ -1,12 +1,12 @@
 import os
 
 from fastapi import FastAPI
-from .app.utils.database import lifespan
+from app.utils.database import lifespan
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 
-from .app.routerspaths.baseroute import base_router
+from app.routerspaths.baseroute import base_router
 
 load_dotenv()
 
@@ -25,4 +25,4 @@ app.add_middleware(
 )
 
 
-app.include_router(base_router)
+app.include_router(base_router, prefix="/api/v1")

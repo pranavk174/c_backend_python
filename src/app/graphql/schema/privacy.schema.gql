@@ -1,0 +1,42 @@
+type Privacy {
+  privacy_id: Int!
+  privacy_type: String!
+  entity_type: String!
+  users: [User!]!
+}
+
+input PrivacyUserInput {
+  privacy_id: Int!
+  users: [Int!]!
+}
+
+type PrivacyList {
+  items: [Privacy!]!
+}
+
+type UserList {
+  items: [User!]!
+}
+
+union P_Response = PrivacyList | UserList
+
+type PrivacyResponse implements apiResponse {
+  message: String!
+  status: Int!
+  success: Boolean!
+  error: String
+  data: P_Response
+}
+
+extend type Query {
+  getPrivacySettings: PrivacyResponse! @auth
+  getPrivacyUsers(privacy_id: Int!): PrivacyResponse! @auth
+}
+
+extend type Mutation {
+  updatePrivacyUsers(input: PrivacyUserInput!): PrivacyResponse! @auth
+  updatePrivacySettings(
+    privacy_type: String!
+    entity_type: String!
+  ): PrivacyResponse! @auth
+}

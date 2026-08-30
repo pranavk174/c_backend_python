@@ -1,0 +1,107 @@
+interface Email {
+  email: String!
+}
+
+type Otp implements Email {
+  email: String!
+  otp: String!
+}
+
+enum theme {
+  dark
+  light
+}
+
+type User implements Email {
+  name: String!
+  id: Int!
+  user_name: String!
+  email: String!
+  bio: String
+  mobile: String!
+  profile_pic: String
+  chat_id: Int
+  cover_pic: String
+}
+
+type Users {
+  items: [User]!
+}
+
+input UserInput {
+  fname: String! @inputvalidate(type: "string")
+  lname: String! @inputvalidate(type: "string")
+  user_name: String! @inputvalidate(type: "string")
+  email: String! @inputvalidate(type: "email")
+  bio: String @inputvalidate(type: "string")
+  mobile: String! @inputvalidate(type: "mobile")
+  profile_pic: String @inputvalidate(type: "url")
+  cover_pic: String @inputvalidate(type: "url")
+}
+
+input UpdateUserInput {
+  name: String @inputvalidate(type: "string")
+  bio: String @inputvalidate(type: "string")
+  cover_pic: String @inputvalidate(type: "url")
+  profile_pic: String @inputvalidate(type: "url")
+  theme: theme @inputvalidate(type: "string")
+}
+
+type verifyOtpData {
+  email: String!
+  id: Int!
+  is_verified: Boolean
+}
+union ResponseData = Users | User | verifyOtpData
+type userApiResponse implements apiResponse {
+  message: String!
+  status: Int!
+  success: Boolean
+  data: ResponseData
+  error: String
+}
+
+input personalizationInput {
+  theme: theme
+}
+
+input verifyOtpInput {
+  device_id: String! @inputvalidate(type: "string")
+  ip_address: String! @inputvalidate(type: "string")
+  location: String! @inputvalidate(type: "string")
+  device_name: String! @inputvalidate(type: "string")
+  email: String! @inputvalidate(type: "email")
+  mobile: String @inputvalidate(type: "mobile")
+  otp: String! @inputvalidate(type: "otp")
+}
+
+enum AccountStatus {
+  delete
+  DELETE
+  suspend
+  SUSPEND
+}
+
+input blockUserInput {
+  blocked_user_id: Int!
+  reason: String
+}
+
+extend type Query {
+  getUser: userApiResponse! @auth
+  getUsers: userApiResponse! @auth
+}
+
+extend type Mutation {
+  sendOtpMail(email: String!): userApiResponse!
+  verifyOtp(input: verifyOtpInput): userApiResponse!
+  createUser(input: UserInput): userApiResponse!
+  updateUser(input: UpdateUserInput): userApiResponse! @auth
+  updatePreference(input: personalizationInput!): userApiResponse! @auth
+  generateRefreshToken: userApiResponse!
+  logout: userApiResponse! @auth
+  deleteUser(action_type: AccountStatus!): userApiResponse! @auth
+  blockUser(input: blockUserInput!): userApiResponse! @auth
+  unBlockUser(input: blockUserInput!): userApiResponse! @auth
+  # loginUser(email:String!):userApiResponse!
+}

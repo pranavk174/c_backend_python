@@ -1,0 +1,43 @@
+scalar BigInt
+
+type Query {
+  _empty: String
+}
+
+type Mutation {
+  _empty: String
+}
+
+type Subscription {
+  _empty: String
+}
+
+directive @auth on FIELD_DEFINITION
+directive @inputvalidate(
+  type: String!
+) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+interface apiResponse {
+  message: String!
+  status: Int!
+  success: Boolean
+  error: String
+}
+
+enum FileType {
+  IMAGE
+  Image
+  image
+
+  VIDEO
+  Video
+  video
+
+  AUDIO
+  Audio
+  audio
+
+  FILE
+  File
+  file
+}
