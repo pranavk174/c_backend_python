@@ -10,7 +10,6 @@ from datetime import datetime, timedelta, timezone
 
 async def responseUpdate(response: Response, user: User, args: verifyOtpInput):
     access_token, refresh_token = generate_token(user, args.device_id)
-    print("=========", args, "argsssss")
 
     email, otp, device_id, ip_address, location, device_name = (
         args.email,

@@ -19,7 +19,7 @@ from ..utils.utils import (
 from ..helpers.apiutils import accountStatus, responseUpdate
 from ..utils.emailsender import send_mail
 from datetime import datetime, timedelta
-from fastapi import Request, Response
+from fastapi import BackgroundTasks, Request, Response
 import asyncio
 import bcrypt
 import re
@@ -32,7 +32,7 @@ EMAIL_REGEX = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 
 
 async def sendOtp(email: str):
-    if not email or not re.match(EMAIL_REGEX, email):
+    if not email:
         raise AppError("Something went wrong!", 404, "Email is Missing")
 
     print("number")
@@ -219,7 +219,7 @@ async def verify_otp(data: verifyOtpInput, response: Response):
 
 async def user_logout(data: User, response: Response):
 
-    done = await db.query_raw(
+    await db.query_raw(
         """
                               update devices set refresh_token = null , 
                               logged_out_at = $1::timestamptz 
