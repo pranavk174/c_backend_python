@@ -3,6 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 import os
+import traceback
 
 load_dotenv()
 
@@ -25,6 +26,7 @@ async def validation_error_handler(
     exc: RequestValidationError,
 ):
     print(exc, "exception in validation")
+    traceback.print_exc()
     return JSONResponse(
         status_code=422,
         content={
@@ -37,6 +39,7 @@ async def validation_error_handler(
 
 
 async def type_error_handler(request: Request, er: TypeError):
+    print(er, "error in type error")
     return JSONResponse(
         status_code=422,
         content={
@@ -49,7 +52,8 @@ async def type_error_handler(request: Request, er: TypeError):
 
 
 async def generic_handler(request: Request, er: Exception):
-    print(er, "exception in exception")
+    print(er, "exception in generic exception")
+    traceback.print_exc()
     return JSONResponse(
         status_code=500,
         content={
@@ -62,7 +66,8 @@ async def generic_handler(request: Request, er: Exception):
 
 
 async def app_error_handler(request: Request, er: AppError):
-    print(er, "exception ")
+    print(er, "exception ina pp error")
+    # traceback.print_exception(type(er), er, er.__traceback__)
     return JSONResponse(
         status_code=er.status,
         content={

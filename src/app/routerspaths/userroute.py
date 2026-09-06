@@ -15,6 +15,7 @@ from ..apis.users import (
     block_user_api,
     create_profile_api,
     get_all_users_data,
+    get_blocked_users,
     get_user_data,
     refresh_token,
     sendOtp as send_otp,
@@ -47,13 +48,11 @@ async def oTpVerify(data: verifyOtpInput, response: Response):
 
 
 @user_router.post("/create_profile", response_model=UserApiResponse)
-
 async def create_profile(data: UserInput):
     return await create_profile_api(data)
 
 
 @user_router.put("/update_profile", response_model=UserApiResponse)
-
 async def update_profile(input: UpdateUserInput, data=Depends(is_logged_in)):
     return await update_profile_api(input, data)
 
@@ -83,6 +82,10 @@ async def get_user(data=Depends(is_logged_in)):
 async def get_user(data=Depends(is_logged_in)):
     return await get_all_users_data(data)
 
+
+@user_router.get('/blocked-users', response_model=UserApiResponse)
+async def get_blocked_user(data=Depends(is_logged_in)):
+    return await get_blocked_users(data)
 
 @user_router.patch("/deactivate-account", response_model=UserApiResponse)
 

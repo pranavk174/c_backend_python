@@ -3,6 +3,7 @@ import os
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from prisma.errors import RawQueryError
 from app.utils.Apierros import (
     AppError,
     app_error_handler,
@@ -34,15 +35,16 @@ app.add_middleware(
 )
 
 
-app.exception_handler(AppError, app_error_handler)
+app.add_exception_handler(AppError, app_error_handler)
 
 app.add_exception_handler(
     RequestValidationError,
     validation_error_handler,
 )
-app.exception_handler(TypeError, type_error_handler)
+app.add_exception_handler(TypeError, type_error_handler)
 
-app.exception_handler(Exception, generic_handler)
+app.add_exception_handler(RawQueryError, generic_handler)
+app.add_exception_handler(Exception, generic_handler)
 
 
 app.include_router(base_router, prefix="/api/v1")

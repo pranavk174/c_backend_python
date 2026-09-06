@@ -13,3 +13,5 @@ class ApiResponse(BaseModel):
 
 class UserApiResponse(ApiResponse):
     data: Users | User | VerifyOtpData | Optional[dict] = None
+
+

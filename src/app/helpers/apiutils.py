@@ -57,7 +57,7 @@ async def responseUpdate(response: Response, user: User, args: verifyOtpInput):
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=900,
+        max_age=60 * 60 * 24 * 30,
     )
     response.set_cookie(
         key="access_token",

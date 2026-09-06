@@ -204,12 +204,12 @@ async def verify_otp(data: verifyOtpInput, response: Response):
                 message="OTP is Invalid Or Expiredss", status=401, success=False
             )
         else:
-            print(
-                expires_at,
-                "expires at",
-                datetime.now(timezone.utc),
-                expires_at <= datetime.now(timezone.utc),
-            )
+            # print(
+            #     expires_at,
+            #     "expires at",
+            #     datetime.now(timezone.utc),
+            #     expires_at <= datetime.now(timezone.utc),
+            # )
             await responseUpdate(response, user[0], data)
 
             return UserApiResponse(
@@ -323,7 +323,7 @@ async def get_all_users_data(data: User):
 
     return UserApiResponse(
         message="Successfully retrieved Users Data",
-        ststus=200,
+        status=200,
         success=True,
         data={"items": users},
     )
@@ -408,7 +408,7 @@ async def create_profile_api(input: UserInput):
 async def update_profile_api(input: UpdateUserInput, data):
     update_data = input.model_dump(exclude_unset=True)
     if not update_data:
-        raise AppError(message="Input field is missing", ststus=400)
+        raise AppError(message="Input field is missing", status=400)
 
     user_id = data["id"]
 
@@ -418,7 +418,7 @@ async def update_profile_api(input: UpdateUserInput, data):
     }
 
     if not update_data:
-        raise AppError(message="No valid fields to update", ststus=400)
+        raise AppError(message="No valid fields to update", status=400)
 
     set_clause = ", ".join(
         f"{key} = ${index}" for index, key in enumerate(update_data.keys(), start=1)
@@ -560,3 +560,21 @@ async def unblock_user_api(input: int, data: User):
     )
 
     return UserApiResponse(message="Successfully unBlocked User", status=201)
+
+
+async def get_blocked_users(user: User):
+    users = await db.query_raw(
+        """
+         SELECT DISTINCT ON (user_id) *
+    FROM block
+    WHERE blocked = true and user_id = $1
+    ORDER BY user_id, block_id DESC
+                             """,
+        user["id"],
+    )
+    return UserApiResponse(
+        message="Successfully retrieved Users Data",
+        status=200,
+        success=True,
+        data={"items": users},
+    )
